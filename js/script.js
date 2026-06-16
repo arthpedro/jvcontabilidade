@@ -118,21 +118,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Contact form
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = contactForm.querySelector('button[type="submit"]');
       const originalText = btn.textContent;
-      btn.textContent = 'Mensagem Enviada!';
-      btn.style.background = '#22c55e';
-      btn.style.borderColor = '#22c55e';
+      btn.textContent = 'Enviando...';
       btn.disabled = true;
-      contactForm.reset();
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.background = '';
-        btn.style.borderColor = '';
-        btn.disabled = false;
-      }, 3000);
+
+      try {
+        const res = await fetch(contactForm.action, {
+          method: 'POST',
+          body: new FormData(contactForm),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          btn.textContent = 'Mensagem Enviada!';
+          btn.style.background = '#22c55e';
+          btn.style.borderColor = '#22c55e';
+          contactForm.reset();
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.disabled = false;
+          }, 3000);
+        } else {
+          throw new Error();
+        }
+      } catch (_) {
+        btn.textContent = 'Erro ao enviar';
+        btn.style.background = '#ef4444';
+        btn.style.borderColor = '#ef4444';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+          btn.style.borderColor = '';
+          btn.disabled = false;
+        }, 3000);
+      }
     });
   }
 
